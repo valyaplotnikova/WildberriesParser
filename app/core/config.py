@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=(".env", ".test.env"),
-        extra=Extra.allow
+        extra="allow"
     )
 
 
