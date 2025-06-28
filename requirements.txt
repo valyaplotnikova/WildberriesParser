@@ -1,10 +1,16 @@
 aiohttp==3.12.13
 alembic==1.16.1
 asyncpg==0.30.0
+coverage==7.9.1
 fastapi==0.115.12
 fake_useragent==2.2.0
+httpx==0.28.1
 pydantic==2.11.5
 pydantic-settings==2.9.1
+pytest==8.4.1
+pytest-asyncio==1.0.0
+pytest-cov==6.2.1
+pytest-dotenv==0.5.2
 python-dotenv==1.1.0
 requests==2.32.4
 SQLAlchemy==2.0.41
