@@ -56,6 +56,8 @@ class ProductRepository:
 
     async def find_all_by_filters(
         self,
+        search_query: str,
+        limit: int,
         category: Optional[str] = None,
         min_price: Optional[Decimal] = None,
         max_price: Optional[Decimal] = None,
@@ -66,6 +68,8 @@ class ProductRepository:
          Поиск товаров с применением фильтров.
 
         Args:
+            search_query: Поисковый запрос(Содержится в названии продукта)
+            limit: Ограничение по количеству выводимых товаров
             category: Фильтр по категории (точное совпадение)
             min_price: Минимальная цена (включительно)
             max_price: Максимальная цена (включительно)
@@ -84,7 +88,7 @@ class ProductRepository:
         """
 
         try:
-            query = select(Product)
+            query = select(Product).where(Product.product_name.ilike(f"%{search_query}%"))
 
             if category:
                 query = query.where(Product.category == category)
@@ -98,7 +102,7 @@ class ProductRepository:
                 query = query.where(Product.reviews_count >= min_reviews_count)
 
             result = await self.session.execute(query)
-            return list(result.scalars().all())
+            return list(result.scalars().all())[:limit]
 
         except SQLAlchemyError as e:
             logger.error(f"Ошибка при фильтрации товаров: {str(e)}")

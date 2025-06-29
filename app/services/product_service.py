@@ -59,15 +59,19 @@ class ProductService:
             raise
 
     async def product_list(
-        self,
-        category: Optional[str] = None,
-        min_price: Optional[Decimal] = None,
-        max_price: Optional[Decimal] = None,
-        min_rating: Optional[float] = None,
-        min_reviews_count: Optional[int] = None,
+            self,
+            search_query: str,
+            limit: int,
+            category: Optional[str] = None,
+            min_price: Optional[Decimal] = None,
+            max_price: Optional[Decimal] = None,
+            min_rating: Optional[float] = None,
+            min_reviews_count: Optional[int] = None,
     ) -> List[Product]:
         """
         Получение отфильтрованного списка товаров из БД.
+        :param search_query: Поисковый запрос(Содержится в названии продукта)
+        :param limit: Ограничение по количеству выводимых товаров
         :param category: Фильтр по категории товара (точное совпадение)
         :param min_price: Минимальная цена товара (включительно)
         :param max_price: Максимальная цена товара (включительно)
@@ -93,6 +97,8 @@ class ProductService:
                 f"min_reviews_count - {min_reviews_count}"
             )
             return await self.repo.find_all_by_filters(
+                search_query=search_query,
+                limit=limit,
                 category=category,
                 min_price=min_price,
                 max_price=max_price,

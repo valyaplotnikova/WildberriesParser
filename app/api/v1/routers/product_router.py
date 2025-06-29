@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
@@ -13,6 +13,32 @@ from app.services.wb_parser import WildberriesParser
 router = APIRouter()
 
 
+@router.post("/parse")
+async def parsing(query: str,
+                  limit: int,
+                  session: AsyncSession = Depends(get_session_with_commit), ) -> Dict:
+    """
+    Эндпоинт выполняет парсинг данных с сайта wildberries и сохраняет их в БД
+
+    :param query: Поисковый запрос (например, "телефон").
+    :param limit: Максимальное количество товаров для парсинга.
+    :param session: Асинхронная сессия БД (автоматически внедряется).
+    :return: сообщение об успешном парсинге и сохранении товаров в БД
+
+    Raises:
+        HTTPException: 500 - При возникновении внутренних ошибок сервера.
+    """
+    service = ProductService(session=session)
+    parser = WildberriesParser(product_service=service, limit=limit)
+    try:
+        result = await parser.parse_and_save(query)
+    except Exception as e:
+        logger.error(f"Ошибка в /products: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+    return {"message": f"Сохранено {result} товаров"}
+
+
 @router.get("/products", response_model=SProductsList)
 async def get_product_list(
     query: str,
@@ -24,13 +50,13 @@ async def get_product_list(
     min_rating: Optional[float] = None,
     min_reviews_count: Optional[int] = None,
 ):
-    """Получение и фильтрация товаров с Wildberries.
+    """Получение  товаров с Wildberries из БД.
 
-    Эндпоинт выполняет парсинг товаров по заданному запросу и возвращает отфильтрованный список.
+    Эндпоинт выполняет поиск товаров по заданному запросу в БД и возвращает отфильтрованный список.
 
     Args:
-        query: Поисковый запрос для парсинга (например, "телефон").
-        limit: Максимальное количество товаров для парсинга.
+        query: Поисковый запрос (например, "телефон").
+        limit: Максимальное количество товаров для вывода.
         session: Асинхронная сессия БД (автоматически внедряется).
         category: Фильтр по категории товара (опционально).
         min_price: Минимальная цена товара (опционально).
@@ -63,18 +89,16 @@ async def get_product_list(
         }
     """
     try:
-        # 1. Парсим товары
         service = ProductService(session=session)
-        parser = WildberriesParser(product_service=service, limit=limit)
-        await parser.parse_and_save(query)
 
-        # 2. Получаем отфильтрованный список
         products = await service.product_list(
+            search_query=query,
             category=category,
             min_price=min_price,
             max_price=max_price,
             min_rating=min_rating,
             min_reviews_count=min_reviews_count,
+            limit=limit
         )
 
         return SProductsList(products=products)
