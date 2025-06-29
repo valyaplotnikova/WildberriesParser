@@ -1,19 +1,16 @@
-from pydantic import Extra
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """ Класс настроек для работы проекта. """
+    """Класс настроек для работы проекта."""
+
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_DB: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
 
-    model_config = SettingsConfigDict(
-        env_file=(".env", ".test.env"),
-        extra="allow"
-    )
+    model_config = SettingsConfigDict(env_file=(".env", ".test.env"), extra="allow")
 
 
 settings = Settings()

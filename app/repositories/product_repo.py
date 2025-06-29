@@ -1,11 +1,11 @@
-from loguru import logger
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, List
+from typing import List, Optional
 
+from loguru import logger
+from sqlalchemy import select, update
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.product import Product
 
@@ -55,32 +55,32 @@ class ProductRepository:
             raise
 
     async def find_all_by_filters(
-            self,
-            category: Optional[str] = None,
-            min_price: Optional[Decimal] = None,
-            max_price: Optional[Decimal] = None,
-            min_rating: Optional[float] = None,
-            min_reviews_count: Optional[int] = None
+        self,
+        category: Optional[str] = None,
+        min_price: Optional[Decimal] = None,
+        max_price: Optional[Decimal] = None,
+        min_rating: Optional[float] = None,
+        min_reviews_count: Optional[int] = None,
     ) -> List[Product]:
         """
-        Поиск товаров с применением фильтров.
+         Поиск товаров с применением фильтров.
 
-       Args:
-           category: Фильтр по категории (точное совпадение)
-           min_price: Минимальная цена (включительно)
-           max_price: Максимальная цена (включительно)
-           min_rating: Минимальный рейтинг (от 0 до 5)
-           min_reviews_count: Минимальное количество отзывов
+        Args:
+            category: Фильтр по категории (точное совпадение)
+            min_price: Минимальная цена (включительно)
+            max_price: Максимальная цена (включительно)
+            min_rating: Минимальный рейтинг (от 0 до 5)
+            min_reviews_count: Минимальное количество отзывов
 
-       Returns:
-           List[Product]: Список товаров, удовлетворяющих условиям
+        Returns:
+            List[Product]: Список товаров, удовлетворяющих условиям
 
-       Raises:
-           SQLAlchemyError: При ошибках выполнения запроса
+        Raises:
+            SQLAlchemyError: При ошибках выполнения запроса
 
-       Notes:
-           - Фильтры комбинируются через логическое И
-           - Если все фильтры None, возвращаются все товары
+        Notes:
+            - Фильтры комбинируются через логическое И
+            - Если все фильтры None, возвращаются все товары
         """
 
         try:
@@ -133,23 +133,26 @@ class ProductRepository:
         """
 
         try:
-            product_id = str(product_data['product_id'])
+            product_id = str(product_data["product_id"])
             product = await self.find_one_or_none_by_id(product_id)
 
             if product is None:
                 # Создаем новый товар
                 product = Product(
                     product_id=product_id,
-                    product_name=str(product_data['product_name']),
-                    price=Decimal(str(product_data['price'])),
-                    discount_price=Decimal(str(product_data['discount_price'])) if product_data.get(
-                        'discount_price') else None,
-                    rating=float(product_data['rating']),
-                    reviews_count=int(product_data['reviews_count']),
-                    product_url=str(product_data['product_url']),
-                    category=str(product_data.get('category', '')),
-                    search_query=str(product_data.get('search_query', '')),
-                    created_at=datetime.now()
+                    product_name=str(product_data["product_name"]),
+                    price=Decimal(str(product_data["price"])),
+                    discount_price=(
+                        Decimal(str(product_data["discount_price"]))
+                        if product_data.get("discount_price")
+                        else None
+                    ),
+                    rating=float(product_data["rating"]),
+                    reviews_count=int(product_data["reviews_count"]),
+                    product_url=str(product_data["product_url"]),
+                    category=str(product_data.get("category", "")),
+                    search_query=str(product_data.get("search_query", "")),
+                    created_at=datetime.now(),
                 )
                 self.session.add(product)
             else:
@@ -158,16 +161,19 @@ class ProductRepository:
                     update(Product)
                     .where(Product.product_id == product_id)
                     .values(
-                        product_name=str(product_data['product_name']),
-                        price=Decimal(str(product_data['price'])),
-                        discount_price=Decimal(str(product_data['discount_price'])) if product_data.get(
-                            'discount_price') else None,
-                        rating=float(product_data['rating']),
-                        reviews_count=int(product_data['reviews_count']),
-                        product_url=str(product_data['product_url']),
-                        category=str(product_data.get('category', '')),
-                        search_query=str(product_data.get('search_query', '')),
-                        updated_at=datetime.now()
+                        product_name=str(product_data["product_name"]),
+                        price=Decimal(str(product_data["price"])),
+                        discount_price=(
+                            Decimal(str(product_data["discount_price"]))
+                            if product_data.get("discount_price")
+                            else None
+                        ),
+                        rating=float(product_data["rating"]),
+                        reviews_count=int(product_data["reviews_count"]),
+                        product_url=str(product_data["product_url"]),
+                        category=str(product_data.get("category", "")),
+                        search_query=str(product_data.get("search_query", "")),
+                        updated_at=datetime.now(),
                     )
                 )
 

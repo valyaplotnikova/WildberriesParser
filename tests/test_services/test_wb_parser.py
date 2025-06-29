@@ -1,5 +1,6 @@
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 
 @pytest.mark.asyncio
@@ -13,7 +14,7 @@ async def test_search_products_success(wb_parser, mock_wb_api):
 @pytest.mark.asyncio
 async def test_search_products_empty_response(wb_parser):
     """Тест: API возвращает статус 200, но без данных"""
-    with patch('aiohttp.ClientSession.get') as mock_get:
+    with patch("aiohttp.ClientSession.get") as mock_get:
         # Мокаем ответ без данных
         mock_response = AsyncMock()
         mock_response.status = 200
@@ -27,7 +28,7 @@ async def test_search_products_empty_response(wb_parser):
 @pytest.mark.asyncio
 async def test_search_products_error_response(wb_parser):
     """Тест ошибки от API"""
-    with patch('aiohttp.ClientSession.get') as mock_get:
+    with patch("aiohttp.ClientSession.get") as mock_get:
         mock_get.return_value.__aenter__.return_value.status = 500
 
         products = await wb_parser.search_products("тест")
@@ -46,15 +47,17 @@ async def test_parse_and_save_success(wb_parser, mock_product_service):
                     "priceU": 10000,
                     "salePriceU": 8000,
                     "rating": 4.5,
-                    "feedbacks": 25
+                    "feedbacks": 25,
                 }
             ]
         }
     }
 
-    with patch('aiohttp.ClientSession.get') as mock_get:
+    with patch("aiohttp.ClientSession.get") as mock_get:
         mock_get.return_value.__aenter__.return_value.status = 200
-        mock_get.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+        mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+            return_value=mock_response
+        )
 
         # Настраиваем мок сервиса
         mock_product_service.process_products.return_value = 1
@@ -74,7 +77,7 @@ def test_parse_products(wb_parser):
             "priceU": 10000,
             "salePriceU": 8000,
             "rating": 4.5,
-            "feedbacks": 25
+            "feedbacks": 25,
         }
     ]
 
@@ -82,10 +85,12 @@ def test_parse_products(wb_parser):
 
     assert len(result) == 1
     product = result[0]
-    assert product['product_id'] == "123"
-    assert product['product_name'] == "Тестовый товар"
-    assert product['price'] == 100.0
-    assert product['discount_price'] == 80.0
-    assert product['rating'] == 4.5
-    assert product['reviews_count'] == 25
-    assert product['product_url'] == "https://www.wildberries.ru/catalog/123/detail.aspx"
+    assert product["product_id"] == "123"
+    assert product["product_name"] == "Тестовый товар"
+    assert product["price"] == 100.0
+    assert product["discount_price"] == 80.0
+    assert product["rating"] == 4.5
+    assert product["reviews_count"] == 25
+    assert (
+        product["product_url"] == "https://www.wildberries.ru/catalog/123/detail.aspx"
+    )

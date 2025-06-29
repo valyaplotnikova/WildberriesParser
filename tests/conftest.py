@@ -1,18 +1,18 @@
 import asyncio
 import os
 from typing import AsyncGenerator
+from unittest.mock import AsyncMock, patch
 
+import pytest
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import StaticPool
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
 from app.core.config import database_url
 from app.db.database import Base
 from app.main import app
 from app.services.product_service import ProductService
 from app.services.wb_parser import WildberriesParser
-from unittest.mock import patch, AsyncMock
-import pytest
-
 
 # Установка правильного event loop для Windows
 if os.name == "nt":
@@ -62,7 +62,9 @@ async def async_session(async_engine):
 # Клиент для тестирования API
 @pytest.fixture(scope="function")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client
 
 
@@ -70,21 +72,24 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture
 def mock_wb_api():
     with patch("app.services.wb_parser.WildberriesParser.search_products") as mock:
-        mock.return_value = [{
-            "product_id": "213ca78c-bca9-4e9b-aaae-935f0a113322",
-            "product_name": "Сумка кросс-боди маленькая",
-            "price": 4990.00,
-            "discount_price": 1436.00,
-            "rating": 5,
-            "reviews_count": 287
-        }, {
-            "product_id": "ac99c0da-b9c8-4b69-80b3-a9064415d5e2",
-            "product_name": "сумка багет на плечо маленькая",
-            "price": 5000.00,
-            "discount_price": 1597.00,
-            "rating": 5,
-            "reviews_count": 5894
-        }]
+        mock.return_value = [
+            {
+                "product_id": "213ca78c-bca9-4e9b-aaae-935f0a113322",
+                "product_name": "Сумка кросс-боди маленькая",
+                "price": 4990.00,
+                "discount_price": 1436.00,
+                "rating": 5,
+                "reviews_count": 287,
+            },
+            {
+                "product_id": "ac99c0da-b9c8-4b69-80b3-a9064415d5e2",
+                "product_name": "сумка багет на плечо маленькая",
+                "price": 5000.00,
+                "discount_price": 1597.00,
+                "rating": 5,
+                "reviews_count": 5894,
+            },
+        ]
         yield mock
 
 
@@ -98,4 +103,3 @@ def mock_product_service():
 @pytest.fixture
 def wb_parser(mock_product_service):
     return WildberriesParser(product_service=mock_product_service, limit=10)
-

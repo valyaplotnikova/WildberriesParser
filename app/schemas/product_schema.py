@@ -13,10 +13,7 @@ class SProductResponse(BaseModel):
     rating: float
     reviews_count: int
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        from_attributes=True
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True, from_attributes=True)
 
 
 class SProductsList(BaseModel):

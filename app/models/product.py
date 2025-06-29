@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import String, Numeric, Float, Integer, TIMESTAMP, func
+from sqlalchemy import TIMESTAMP, Float, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.database import Base
@@ -19,8 +19,9 @@ class Product(Base):
     product_url: Mapped[str] = mapped_column(String(500))
     category: Mapped[str] = mapped_column(String(100))
     search_query: Mapped[str] = mapped_column(String(200))
-    created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=False), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP,
-                                                 server_default=func.now(),
-                                                 onupdate=func.now(),
-                                                 nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=False), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=True
+    )

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional, List
+from typing import List, Optional
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,7 @@ class ProductService:
         session (AsyncSession): Асинхронная сессия для работы с БД
         repo (ProductRepository): Репозиторий для операций с товарами
     """
+
     def __init__(self, session: AsyncSession):
         """
         Инициализация сервиса товаров.
@@ -58,12 +59,12 @@ class ProductService:
             raise
 
     async def product_list(
-            self,
-            category: Optional[str] = None,
-            min_price: Optional[Decimal] = None,
-            max_price: Optional[Decimal] = None,
-            min_rating: Optional[float] = None,
-            min_reviews_count: Optional[int] = None
+        self,
+        category: Optional[str] = None,
+        min_price: Optional[Decimal] = None,
+        max_price: Optional[Decimal] = None,
+        min_rating: Optional[float] = None,
+        min_reviews_count: Optional[int] = None,
     ) -> List[Product]:
         """
         Получение отфильтрованного списка товаров из БД.
@@ -84,17 +85,19 @@ class ProductService:
             - Фильтры комбинируются через AND
         """
         try:
-            logger.info(f"Получаем список товаров по фильтрам: category - {category},"
-                        f"min_price - {min_price},"
-                        f"max_price - {max_price},"
-                        f"min_rating - {min_rating},"
-                        f"min_reviews_count - {min_reviews_count}")
+            logger.info(
+                f"Получаем список товаров по фильтрам: category - {category},"
+                f"min_price - {min_price},"
+                f"max_price - {max_price},"
+                f"min_rating - {min_rating},"
+                f"min_reviews_count - {min_reviews_count}"
+            )
             return await self.repo.find_all_by_filters(
                 category=category,
                 min_price=min_price,
                 max_price=max_price,
                 min_rating=min_rating,
-                min_reviews_count=min_reviews_count
+                min_reviews_count=min_reviews_count,
             )
         except Exception as e:
             logger.error(f"Ошибка получения списка товаров: {str(e)}")

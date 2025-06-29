@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from fastapi import FastAPI, APIRouter
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
@@ -17,11 +18,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[dict, None]:
 
 def create_app() -> FastAPI:
     """
-   Создание и конфигурация FastAPI приложения.
+    Создание и конфигурация FastAPI приложения.
 
-   Returns:
-       Сконфигурированное приложение FastAPI
-   """
+    Returns:
+        Сконфигурированное приложение FastAPI
+    """
     app = FastAPI(
         title="Микросервис для парсинга данных о товарах с сайта Wildberries",
         lifespan=lifespan,
@@ -33,7 +34,7 @@ def create_app() -> FastAPI:
         allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"]
+        allow_headers=["*"],
     )
 
     # Регистрация роутеров
@@ -55,7 +56,7 @@ def register_routers(app: FastAPI) -> None:
 
     # Подключение роутеров
     app.include_router(root_router, tags=["root"])
-    app.include_router(product_router, tags=["products"], prefix='/api')
+    app.include_router(product_router, tags=["products"], prefix="/api")
 
 
 # Создание экземпляра приложения

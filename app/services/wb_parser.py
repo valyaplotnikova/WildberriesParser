@@ -1,6 +1,7 @@
-import aiohttp
 import json
-from typing import List, Dict
+from typing import Dict, List
+
+import aiohttp
 from loguru import logger
 
 from app.services.product_service import ProductService
@@ -20,6 +21,7 @@ class WildberriesParser:
         product_service (ProductService): Сервис для работы с товарами.
         limit (int): Максимальное количество товаров для парсинга.
     """
+
     def __init__(self, product_service: ProductService, limit: int):
         """
         Инициализация парсера.
@@ -28,8 +30,10 @@ class WildberriesParser:
             product_service: Сервис для сохранения товаров в БД.
             limit: Максимальное количество товаров для парсинга.
         """
-        self.ua = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0 Safari/537.36")
+        self.ua = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0 Safari/537.36"
+        )
         self.base_url = "https://www.wildberries.ru"
         self.search_url = "https://search.wb.ru/exactmatch/ru/common/v4/search"
         self.product_service = product_service
@@ -62,37 +66,39 @@ class WildberriesParser:
             100
         """
         params = {
-            'TestGroup': 'no_test',
-            'TestID': 'no_test',
-            'appType': '1',
-            'curr': 'rub',
-            'dest': '-1257786',
-            'resultset': 'catalog',
-            'sort': 'popular',
-            'spp': '0',
-            'suppressSpellcheck': 'false',
-            'query': query,
-            'page': 1,
-            'limit': self.limit
+            "TestGroup": "no_test",
+            "TestID": "no_test",
+            "appType": "1",
+            "curr": "rub",
+            "dest": "-1257786",
+            "resultset": "catalog",
+            "sort": "popular",
+            "spp": "0",
+            "suppressSpellcheck": "false",
+            "query": query,
+            "page": 1,
+            "limit": self.limit,
         }
 
         headers = {
-            'User-Agent': self.ua,
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-site',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
+            "User-Agent": self.ua,
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
         }
 
         try:
             logger.info(f"Поиск товаров: {query}")
             async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.get(self.search_url, params=params, ssl=False, timeout=30) as response:
+                async with session.get(
+                    self.search_url, params=params, ssl=False, timeout=30
+                ) as response:
                     if response.status != 200:
                         logger.error(f"Ошибка ответа от сервера: {response.status}")
                         return []
@@ -111,10 +117,12 @@ class WildberriesParser:
 
                     products_data = data.get("data", {}).get("products", [])
 
-                    logger.info(f"API вернул {len(products_data)} товаров, запрошено: {self.limit}")
+                    logger.info(
+                        f"API вернул {len(products_data)} товаров, запрошено: {self.limit}"
+                    )
 
                     if len(products_data) > self.limit:
-                        products_data = products_data[:self.limit]
+                        products_data = products_data[: self.limit]
                         logger.info(f"Ограничили до {self.limit} товаров")
 
                     return self._parse_products(products_data)
@@ -149,11 +157,11 @@ class WildberriesParser:
 
         for product in products_data:
             try:
-                product_id = product.get('id', '')
-                product_name = product.get('name', '').strip() or 'Без названия'
+                product_id = product.get("id", "")
+                product_name = product.get("name", "").strip() or "Без названия"
 
-                original_price = product.get('priceU', 0)
-                sale_price = product.get('salePriceU', 0)
+                original_price = product.get("priceU", 0)
+                sale_price = product.get("salePriceU", 0)
 
                 original_price_rub = original_price / 100 if original_price else 0
                 sale_price_rub = sale_price / 100 if sale_price else 0
@@ -165,21 +173,21 @@ class WildberriesParser:
                     price = sale_price_rub if sale_price_rub > 0 else original_price_rub
                     discount_price = None
 
-                rating = product.get('rating', 0)
-                review_count = product.get('feedbacks', 0)
+                rating = product.get("rating", 0)
+                review_count = product.get("feedbacks", 0)
 
                 product_url = f"{self.base_url}/catalog/{product_id}/detail.aspx"
 
                 parsed_product = {
-                    'product_id': str(product_id),
-                    'product_name': product_name,
-                    'price': price,
-                    'discount_price': discount_price,
-                    'rating': rating,
-                    'reviews_count': review_count,
-                    'product_url': product_url,
-                    'category': '',
-                    'search_query': ''
+                    "product_id": str(product_id),
+                    "product_name": product_name,
+                    "price": price,
+                    "discount_price": discount_price,
+                    "rating": rating,
+                    "reviews_count": review_count,
+                    "product_url": product_url,
+                    "category": "",
+                    "search_query": "",
                 }
 
                 parsed_products.append(parsed_product)
@@ -212,11 +220,13 @@ class WildberriesParser:
             return 0
 
         for product in products_data:
-            product.update({
-                'product_id': str(product['product_id']),
-                'search_query': query,
-                'category': category,
-                'product_url': f"{self.base_url}/catalog/{product['product_id']}/detail.aspx"
-            })
+            product.update(
+                {
+                    "product_id": str(product["product_id"]),
+                    "search_query": query,
+                    "category": category,
+                    "product_url": f"{self.base_url}/catalog/{product['product_id']}/detail.aspx",
+                }
+            )
 
         return await self.product_service.process_products(products_data)

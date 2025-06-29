@@ -13,16 +13,16 @@ from app.services.wb_parser import WildberriesParser
 router = APIRouter()
 
 
-@router.get('/products', response_model=SProductsList)
+@router.get("/products", response_model=SProductsList)
 async def get_product_list(
-        query: str,
-        limit: int,
-        session: AsyncSession = Depends(get_session_with_commit),
-        category: Optional[str] = None,
-        min_price: Optional[Decimal] = None,
-        max_price: Optional[Decimal] = None,
-        min_rating: Optional[float] = None,
-        min_reviews_count: Optional[int] = None
+    query: str,
+    limit: int,
+    session: AsyncSession = Depends(get_session_with_commit),
+    category: Optional[str] = None,
+    min_price: Optional[Decimal] = None,
+    max_price: Optional[Decimal] = None,
+    min_rating: Optional[float] = None,
+    min_reviews_count: Optional[int] = None,
 ):
     """Получение и фильтрация товаров с Wildberries.
 
@@ -74,14 +74,11 @@ async def get_product_list(
             min_price=min_price,
             max_price=max_price,
             min_rating=min_rating,
-            min_reviews_count=min_reviews_count
+            min_reviews_count=min_reviews_count,
         )
 
         return SProductsList(products=products)
 
     except Exception as e:
         logger.error(f"Ошибка в /products: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error"
-        )
+        raise HTTPException(status_code=500, detail="Internal server error")

@@ -18,7 +18,7 @@ async def test_create_product(async_session):
         "product_url": "test_url",
         "category": "Category",
         "search_query": "Test_query",
-        "created_at": datetime.now()
+        "created_at": datetime.now(),
     }
     product = await repo.create_or_update(data)
     assert product.id is not None
@@ -34,7 +34,7 @@ async def test_create_product(async_session):
         "product_url": "test_url",
         "category": "Category",
         "search_query": "Test_query",
-        "created_at": datetime.now()
+        "created_at": datetime.now(),
     }
 
     product = await repo.create_or_update(data)
